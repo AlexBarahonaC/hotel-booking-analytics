@@ -67,7 +67,8 @@ Proceden del cuaderno `notebooks/Fase3_ModeladoAvanzado_Colab.ipynb` (ejecución
 
 - `src/smoke_test.py` comprueba que los modelos reproducen ROC-AUC, F1 y MAE oficiales, que los clústeres coinciden con los de la Fase 3 y que la semana de llegada se calcula como en el dataset.
 - `src/exportar_modelos_nativos.py` documenta cómo se obtuvieron los modelos portables a partir de los `.joblib` de Colab, sin reentrenar.
-- Los cuadernos se ejecutaron en Google Colab. El de la Fase 3 lee los CSV desde su directorio de trabajo: copia allí los archivos de `data/`.
+- Los cuadernos se ejecutaron en Google Colab. El de la Fase 3 descarga los CSV si no están en su directorio; también puedes copiar allí los de `data/`.
+- El MLP (PyTorch) es un modelo de comparación y no está desplegado. Sus cifras son las del cuaderno (GPU T4) y varían ligeramente según el hardware. XGBoost y K-Means se cargan ya entrenados, por lo que sus resultados no cambian.
 
 ## Datos
 
