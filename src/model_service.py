@@ -1,141 +1,101 @@
+"""Carga de los modelos de la Fase 3 (Colab, 23-nov-2026) e inferencia para el dashboard."""
 from __future__ import annotations
 
-from pathlib import Path
 import json
 import sys
-import warnings
+from pathlib import Path
+
+import joblib
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
+import xgboost as xgb
 from xgboost import XGBClassifier, XGBRegressor
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC_DIR = ROOT / "src"
 MODELS_DIR = ROOT / "models"
-DATA_DIR = ROOT / "data"
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
-
-from transformadores import crear_preprocesador, crear_preprocesador_clustering  # noqa: E402
+if str(ROOT / "src") not in sys.path:               # los .joblib referencian el módulo transformadores
+    sys.path.insert(0, str(ROOT / "src"))
 
 CAT_VARS = [
-    "hotel", "arrival_date_month", "meal", "country", "market_segment",
-    "distribution_channel", "reserved_room_type", "deposit_type", "agent",
-    "customer_type",
+    "hotel", "arrival_date_month", "meal", "country", "market_segment", "distribution_channel",
+    "reserved_room_type", "deposit_type", "agent", "customer_type",
 ]
-DTYPES = {"agent": str, "grupo_dup": str}
+
+NOMBRES_CLUSTER = {
+    0: "Último minuto",
+    1: "Escapadas de fin de semana",
+    2: "Estancias largas vacacionales",
+    3: "Anticipadas entre semana",
+    4: "Clientes comprometidos",
+    5: "Familias y grupos premium",
+}
+
+
+def load_json(nombre: str):
+    return json.loads((MODELS_DIR / nombre).read_text(encoding="utf-8"))
 
 
 def load_metadata() -> dict:
-    with open(MODELS_DIR / "metadatos_fase3.json", encoding="utf-8") as fh:
-        return json.load(fh)
-
-
-def _load_train() -> pd.DataFrame:
-    return pd.read_csv(DATA_DIR / "df_train_final.csv", dtype=DTYPES)
-
-
-def _build_supervised_artifacts(train: pd.DataFrame, metadata: dict):
-    """Reconstruye los preprocesadores y carga XGBoost desde formato nativo estable.
-
-    Los .joblib originales de Fase 3 contienen snapshots pickle de XGBoost y pueden
-    fallar al cambiar de versión de Python. Los modelos .ubj se cargan con la API
-    nativa de XGBoost y los preprocesadores se ajustan de nuevo SOLO con train,
-    exactamente con las reglas de las Fases 2 y 3.
-    """
-    vars_c = metadata["clasificacion"]["variables"]
-    vars_r = metadata["regresion"]["variables"]
-
-    num_c = [c for c in vars_c if c not in CAT_VARS]
-    cat_c = [c for c in vars_c if c in CAT_VARS]
-    num_r = [c for c in vars_r if c not in CAT_VARS]
-    cat_r = [c for c in vars_r if c in CAT_VARS]
-
-    pre_c = crear_preprocesador(num_c, cat_c, es_regresion=False).fit(train[vars_c])
-    pre_r = crear_preprocesador(num_r, cat_r, es_regresion=True).fit(train[vars_r])
-
-    clf = XGBClassifier()
-    clf.load_model(MODELS_DIR / "xgb_clasificacion.ubj")
-    reg = XGBRegressor()
-    reg.load_model(MODELS_DIR / "xgb_regresion.ubj")
-
-    return {"pre": pre_c, "model": clf}, {"pre": pre_r, "model": reg}
-
-
-def _build_clustering_artifact(train: pd.DataFrame, metadata: dict) -> dict:
-    vars_clust = metadata["clustering"]["variables"]
-    k = int(metadata["clustering"]["k"])
-    pre = crear_preprocesador_clustering(vars_clust).fit(train[vars_clust])
-    z = pre.transform(train[vars_clust])
-
-    # Misma configuración utilizada en el Colab de la Fase 3.
-    kmeans = KMeans(n_clusters=k, n_init=10, random_state=42).fit(z)
-
-    # Reordenamiento original: etiqueta 0 = clúster con menor ADR medio.
-    adr_medio = pd.Series(train["adr"].to_numpy()).groupby(kmeans.labels_).mean().sort_values()
-    mapping = {int(old): int(new) for new, old in enumerate(adr_medio.index)}
-
-    pca = PCA(n_components=2, random_state=42).fit(z)
-    return {
-        "preprocesador": pre,
-        "kmeans": kmeans,
-        "pca": pca,
-        "mapa_etiquetas": mapping,
-        "variables": vars_clust,
-    }
+    return load_json("metadatos_fase3.json")
 
 
 def load_artifacts() -> dict:
-    metadata = load_metadata()
-    train = _load_train()
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        clf, reg = _build_supervised_artifacts(train, metadata)
-        clu = _build_clustering_artifact(train, metadata)
-    return {"clasificacion": clf, "regresion": reg, "clustering": clu}
+    clf, reg = XGBClassifier(), XGBRegressor()
+    clf.load_model(MODELS_DIR / "xgb_clasificacion.ubj")
+    reg.load_model(MODELS_DIR / "xgb_regresion.ubj")
+    return {
+        "clasificacion": {"pre": joblib.load(MODELS_DIR / "preproc_clasificacion.joblib"), "model": clf},
+        "regresion": {"pre": joblib.load(MODELS_DIR / "preproc_regresion.joblib"), "model": reg},
+        "clustering": joblib.load(MODELS_DIR / "pipeline_clustering.joblib"),
+    }
 
 
-def _coerce_categoricals(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    categorical = CAT_VARS
-    for col in categorical:
-        if col in df.columns:
-            df[col] = df[col].fillna("UNK").astype(str)
-    if "agent" in df.columns:
-        df["agent"] = df["agent"].replace({"<NA>": "0", "nan": "0"})
-    return df
+def _variable_original(columna: str) -> str:
+    """'cat__country_PRT' -> 'country'; 'other_num__adults' -> 'adults'."""
+    nombre = columna.split("__", 1)[-1]
+    for cat in sorted(CAT_VARS, key=len, reverse=True):
+        if nombre == cat or nombre.startswith(cat + "_"):
+            return cat
+    return nombre
+
+
+def contribuciones(x: pd.DataFrame, model) -> pd.Series:
+    """Valores SHAP de XGBoost (pred_contribs) de una fila, sumados por variable original."""
+    contrib = model.get_booster().predict(xgb.DMatrix(x), pred_contribs=True)[0]
+    serie = pd.Series(contrib[:-1], index=[_variable_original(c) for c in x.columns])
+    serie = serie.groupby(level=0).sum()
+    return serie.reindex(serie.abs().sort_values(ascending=False).index)
 
 
 def predict_cancellation(row: pd.DataFrame, artifacts: dict, metadata: dict) -> dict:
-    row = _coerce_categoricals(row)
-    variables = metadata["clasificacion"]["variables"]
     bundle = artifacts["clasificacion"]
-    x = bundle["pre"].transform(row[variables])
-    proba = float(bundle["model"].predict_proba(x)[:, 1][0])
-    threshold = float(metadata["clasificacion"]["umbral"])
-    return {"probability": proba, "threshold": threshold, "prediction": int(proba >= threshold)}
+    x = bundle["pre"].transform(row[metadata["clasificacion"]["variables"]])
+    puntaje = float(bundle["model"].predict_proba(x)[0, 1])
+    umbral = float(metadata["clasificacion"]["umbral"])
+    return {"puntaje": puntaje, "umbral": umbral, "alerta": puntaje >= umbral,
+            "factores": contribuciones(x, bundle["model"])}
 
 
-def predict_adr(row: pd.DataFrame, artifacts: dict, metadata: dict) -> float:
-    row = _coerce_categoricals(row)
-    variables = metadata["regresion"]["variables"]
+def predict_adr(row: pd.DataFrame, artifacts: dict, metadata: dict) -> dict:
     bundle = artifacts["regresion"]
-    x = bundle["pre"].transform(row[variables])
-    return float(bundle["model"].predict(x)[0])
+    x = bundle["pre"].transform(row[metadata["regresion"]["variables"]])
+    return {"adr": max(0.0, float(bundle["model"].predict(x)[0])),
+            "factores": contribuciones(x, bundle["model"])}
 
 
-def predict_cluster(row: pd.DataFrame, artifacts: dict) -> dict:
-    bundle = artifacts["clustering"]
-    variables = bundle["variables"]
-    z = bundle["preprocesador"].transform(row[variables])
-    raw_cluster = int(bundle["kmeans"].predict(z)[0])
-    mapping = bundle.get("mapa_etiquetas", {})
-    mapped_cluster = mapping.get(raw_cluster, mapping.get(str(raw_cluster), raw_cluster))
-    pca_coords = bundle["pca"].transform(z)[0]
-    return {
-        "cluster": int(mapped_cluster),
-        "raw_cluster": raw_cluster,
-        "pca1": float(pca_coords[0]),
-        "pca2": float(pca_coords[1]),
-    }
+def assign_clusters(df: pd.DataFrame, artifacts: dict) -> pd.DataFrame:
+    """Clúster (numeración de la Fase 3) y coordenadas PCA de cada reserva."""
+    b = artifacts["clustering"]
+    z = b["preprocesador"].transform(df[b["variables"]])
+    lut = np.array([b["mapa_etiquetas"][i] for i in range(len(b["mapa_etiquetas"]))])
+    pca = b["pca"].transform(z)
+    return pd.DataFrame({"cluster": lut[b["kmeans"].predict(z)], "pca1": pca[:, 0], "pca2": pca[:, 1]},
+                        index=df.index)
+
+
+def tasa_observada(puntaje: float, confiabilidad: list[dict]) -> dict:
+    """Banda de validación a la que pertenece el puntaje, con su tasa real de cancelación."""
+    for banda in confiabilidad:
+        if puntaje <= banda["hasta"]:
+            return banda
+    return confiabilidad[-1]

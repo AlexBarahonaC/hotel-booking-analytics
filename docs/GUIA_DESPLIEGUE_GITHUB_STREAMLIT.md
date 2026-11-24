@@ -1,28 +1,31 @@
-# Guía breve de despliegue
+# Guía de publicación
 
-## 1. Crear el repositorio
+## 1. Repositorio público en GitHub
 
-Crea un repositorio público en GitHub y sube el contenido de la carpeta `Hotel_Booking_Fase4` manteniendo su estructura.
-
-## 2. Verificar archivos indispensables
-
-En la raíz deben estar `requirements.txt` y `runtime.txt`. El archivo principal es `dashboard/app.py`. Las carpetas `data`, `models`, `src` y `figures` deben estar presentes.
-
-## 3. Streamlit Community Cloud
-
-En Streamlit Community Cloud selecciona el repositorio, la rama principal y `dashboard/app.py`. La aplicación instalará las dependencias indicadas en `requirements.txt` y utilizará Python 3.12.
-
-## 4. Validación antes de publicar
-
-En local ejecuta:
+Crea un repositorio **público y vacío** (sin README) y, desde la carpeta del proyecto:
 
 ```bash
-python src/smoke_test.py
-python -m streamlit run dashboard/app.py
+git init -b main
+git add .
+git commit -m "Hotel Booking Analytics: entrega de la Fase 4"
+git remote add origin https://github.com/AlexBarahonaC/hotel-booking-analytics.git
+git push -u origin main
 ```
 
-Si el smoke test imprime `OK - datos y modelos cargados`, la estructura y los artefactos están accesibles.
+El archivo más grande pesa unos 21 MB, por debajo del límite de 100 MB de GitHub: no hace falta Git LFS. Usa la consola y no la carga web, que limita cada archivo a 25 MB y maneja mal las carpetas grandes.
 
-## 5. Nota sobre tamaño
+## 2. Streamlit Community Cloud
 
-Los pipelines y datos procesados se incluyen para que la aplicación sea reproducible y no requiera reentrenamiento. Si GitHub rechaza algún archivo por límite de tamaño, utiliza Git LFS para ese archivo sin cambiar las rutas del proyecto.
+1. Entra a https://share.streamlit.io con tu cuenta de GitHub y elige **Create app**.
+2. Selecciona el repositorio, la rama `main` y el archivo `dashboard/app.py`.
+3. En **Advanced settings**, elige **Python 3.12** (o 3.13). La versión se define ahí.
+4. Despliega. La primera instalación tarda unos minutos.
+
+`requirements.txt` y `.streamlit/config.toml` deben quedar en la raíz del repositorio.
+
+## 3. Después de publicar
+
+- Abre la URL en una ventana de incógnito: debe cargar sin iniciar sesión.
+- Ejecuta una predicción y cambia un filtro.
+- Pega las dos URL en `README.md` y en el informe.
+- El día de la sustentación, abre la app unos minutos antes: si estuvo inactiva puede tardar en despertar. Ten lista la versión local como respaldo.

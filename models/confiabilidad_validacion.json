@@ -1,0 +1,72 @@
+[
+  {
+    "desde": 0.0,
+    "hasta": 0.1,
+    "n": 6967,
+    "puntaje_medio": 0.018149262065430428,
+    "tasa_observada": 0.016362853451987944
+  },
+  {
+    "desde": 0.1,
+    "hasta": 0.2,
+    "n": 1266,
+    "puntaje_medio": 0.14683668311879533,
+    "tasa_observada": 0.1066350710900474
+  },
+  {
+    "desde": 0.2,
+    "hasta": 0.3,
+    "n": 1021,
+    "puntaje_medio": 0.24884236660164788,
+    "tasa_observada": 0.21253672869735554
+  },
+  {
+    "desde": 0.3,
+    "hasta": 0.4,
+    "n": 893,
+    "puntaje_medio": 0.34975186260656976,
+    "tasa_observada": 0.303471444568869
+  },
+  {
+    "desde": 0.4,
+    "hasta": 0.5,
+    "n": 835,
+    "puntaje_medio": 0.4491386530998938,
+    "tasa_observada": 0.34970059880239523
+  },
+  {
+    "desde": 0.5,
+    "hasta": 0.6,
+    "n": 788,
+    "puntaje_medio": 0.5573061513265377,
+    "tasa_observada": 0.5101522842639594
+  },
+  {
+    "desde": 0.6,
+    "hasta": 0.7,
+    "n": 771,
+    "puntaje_medio": 0.6513298487848809,
+    "tasa_observada": 0.5538261997405967
+  },
+  {
+    "desde": 0.7,
+    "hasta": 0.8,
+    "n": 850,
+    "puntaje_medio": 0.7497627932183882,
+    "tasa_observada": 0.6858823529411765
+  },
+  {
+    "desde": 0.8,
+    "hasta": 0.9,
+    "n": 1216,
+    "puntaje_medio": 0.8523752007535413,
+    "tasa_observada": 0.8305921052631579
+  },
+  {
+    "desde": 0.9,
+    "hasta": 1.0,
+    "n": 3306,
+    "puntaje_medio": 0.9821514748329836,
+    "tasa_observada": 0.9767090139140956
+  }
+]

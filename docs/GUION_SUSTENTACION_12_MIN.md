@@ -24,15 +24,15 @@ Clustering: K-Means y jerárquico; solución desplegada con K=6. Explicar que ca
 
 ## 6:00–10:20 · Demostración en vivo del dashboard
 
-1. Abrir “Resumen ejecutivo”. Mostrar filtros de fecha, hotel y segmento. Cambiar un filtro para evidenciar que KPI y gráficos se actualizan.
-2. Abrir “Predicción en vivo → Riesgo de cancelación”. Ingresar una reserva y ejecutar. Explicar que la barra usa el umbral aprendido en validación, no un 0,5 arbitrario.
-3. Abrir “Estimación de ADR”. Ejecutar una predicción y mostrar ADR y valor estimado de estancia.
-4. Abrir “Segmentación”. Cambiar ejes 2D/3D; mostrar perfiles promedio; ingresar una nueva reserva y asignarla a un clúster.
-5. Abrir “Modelos”. Mostrar métricas y una gráfica SHAP/codo-silueta como evidencia de interpretabilidad y selección.
+1. Abrir “Resumen ejecutivo”. Señalar las dos filas de KPI: rendimiento de la solución (fija, conjunto de prueba) e indicadores de negocio. Filtrar por Resort Hotel para evidenciar que los indicadores y gráficos se actualizan.
+2. Abrir “Predicción en vivo”. Ingresar una reserva y ejecutar. Explicar el puntaje de riesgo, el umbral fijado en validación y la tasa real observada en su banda.
+3. En la misma pantalla, mostrar el ADR estimado, el segmento asignado y los gráficos de factores que explican cada resultado.
+4. Abrir “Segmentación”. Ubicar la reserva consultada en el mapa PCA, resaltar un clúster, cambiar a 3D y leer los perfiles promedio.
+5. Abrir “Modelos”. Mostrar la comparación, el resultado por cada 1.000 reservas (291 detectadas, 62 no detectadas, 75 falsas alarmas) y los límites del modelo.
 
 ## 10:20–11:20 · Rigor y reproducibilidad
 
-Resaltar que los pipelines contienen el preprocesamiento junto con el modelo; `agent` se conserva como variable nominal; los artefactos fueron persistidos; se fija `scikit-learn==1.6.1`; el repositorio contiene datos, notebooks, src, dashboard, modelos y requirements.
+Resaltar que el dashboard usa los modelos entrenados en la Fase 3, exportados a formato nativo sin reentrenar; que la prueba de integridad verifica que reproducen las métricas oficiales; que `agent` se trata como variable nominal, y que el repositorio fija las versiones y contiene datos, cuadernos, código y modelos.
 
 ## 11:20–12:00 · Cierre
 
@@ -43,6 +43,12 @@ Resaltar que los pipelines contienen el preprocesamiento junto con el modelo; `a
 **¿Por qué XGBoost?** Porque fue el modelo con mejor equilibrio de desempeño en validación/prueba y capturó relaciones no lineales e interacciones que los modelos lineales no representaban igual de bien.
 
 **¿Por qué el umbral no es 0,5?** Porque se seleccionó en validación. La prueba se utilizó una sola vez con las decisiones ya congeladas.
+
+**¿Por qué el puntaje no es una probabilidad?** Porque el entrenamiento pondera la clase minoritaria (scale_pos_weight) y eso eleva los valores intermedios: entre 60 y 70 puntos cancela el 55 % en validación. El puntaje ordena bien el riesgo y la app muestra la tasa real de cada banda.
+
+**¿Cumplieron todas las metas SMART?** ROC-AUC (0,941 frente a 0,85) y reducción del RMSE (68 % frente a 20 %), sí. La silueta no: 0,22 frente a 0,25; los clústeres son zonas de un continuo, pero son estables en prueba y separan tasas de cancelación de 12 % a 53 %.
+
+**¿Funcionaría hoy?** No sin reentrenar: al evaluar en 2017 con datos previos, el ROC-AUC baja a 0,881 y el R² a 0,756.
 
 **¿Cómo evitaron data leakage?** Las transformaciones que aprenden parámetros se ajustaron solo con entrenamiento; se excluyeron variables de desenlace y variables operativas identificadas como fuga; los duplicados se mantuvieron agrupados en la partición.
 

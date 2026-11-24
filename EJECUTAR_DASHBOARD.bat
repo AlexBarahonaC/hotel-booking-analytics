@@ -76,14 +76,16 @@ echo.
 echo El navegador debe abrir: http://localhost:8501
 echo Para cerrar el dashboard, vuelva a esta ventana y presione Ctrl+C.
 echo.
-python -m streamlit run dashboard\app.py
+python -m streamlit run dashboard\app.py --server.headless false
 exit /b 0
 
 :python_error
 echo.
 echo ERROR: No se encontro Python 3.13 o 3.12 de 64 bits.
-echo Si ya tiene Python 3.13 instalado, compruebe en CMD: python --version
-echo o: py -3.13 --version
+echo Python 3.14 no sirve: scikit-learn 1.6.1 no tiene instalador para esa version.
+echo Puede instalar Python 3.13 sin quitar su version actual, desde CMD:
+echo     winget install Python.Python.3.13
+echo Luego cierre esta ventana y vuelva a ejecutar este archivo.
 echo.
 pause
 exit /b 1

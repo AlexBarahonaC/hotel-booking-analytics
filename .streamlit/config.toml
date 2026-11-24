@@ -6,10 +6,5 @@ secondaryBackgroundColor = "#0F172A"
 textColor = "#E5E7EB"
 font = "sans serif"
 
-[server]
-headless = true
-runOnSave = true
-maxUploadSize = 200
-
 [browser]
 gatherUsageStats = false

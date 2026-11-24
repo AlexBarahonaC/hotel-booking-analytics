@@ -1,5 +1,6 @@
-Estos son los pipelines .joblib originales exportados por la Fase 3.
-Se conservan como evidencia/reproducibilidad, pero el dashboard NO los carga.
-XGBoost documenta que pickle/joblib es un snapshot de memoria que puede no ser
-portable entre versiones de Python. La Fase 4 usa xgb_clasificacion.ubj y
-xgb_regresion.ubj, y reconstruye los preprocesadores con el conjunto train.
+Pipelines .joblib originales exportados por la Fase 3 (Colab, 23-nov-2026).
+
+En Windows, los dos pipelines con XGBoost fallan al cargar ("input stream corrupted"), tanto en
+Python 3.12 como en 3.13. El modelo, sin embargo, esta completo dentro del archivo:
+src/exportar_modelos_nativos.py lo extrae SIN reentrenar, comprueba que reproduce las metricas
+oficiales y lo guarda en ../xgb_*.ubj y ../preproc_*.joblib, que son los que usa el dashboard.

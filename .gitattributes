@@ -1,0 +1,7 @@
+* text=auto
+*.sh text eol=lf
+*.bat text eol=crlf
+*.csv -text
+*.ubj binary
+*.joblib binary
+*.pt binary
