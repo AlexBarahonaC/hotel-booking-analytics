@@ -5,7 +5,7 @@ Proyecto Integrador de Ciencia de Datos · Maestría en Inteligencia Artificial 
 **Autores:** [Miguel Angel Ricardo](https://github.com/Miguel0819R) y [Jose Alexander Barahona Calderon](https://github.com/AlexBarahonaC)  
 **Docente:** Fabián Camilo Castro Riveros
 
-- **Dashboard en vivo:** _pendiente: pegar URL de Streamlit_
+- **Dashboard en vivo:** https://hotel-booking-analytics-lasalle.streamlit.app
 - **Repositorio:** https://github.com/AlexBarahonaC/hotel-booking-analytics
 
 Predice la cancelación de reservas hoteleras, estima su tarifa diaria (ADR) y las segmenta por perfil de riesgo y valor, a partir de 119.193 reservas de dos hoteles de Portugal (2015–2017).
