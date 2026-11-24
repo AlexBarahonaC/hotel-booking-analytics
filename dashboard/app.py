@@ -174,12 +174,12 @@ st.markdown(
 FECHA_MIN, FECHA_MAX = data["arrival_date"].min().date(), data["arrival_date"].max().date()
 ADR_MAX = float(np.ceil(data["adr"].max() / 10) * 10)      # incluye todas las reservas
 LEAD_MAX, NOCHES_MAX = int(data["lead_time"].max()), int(data["total_noches"].max())
-FILTROS = ["f_fechas", "f_hotel", "f_segmento", "f_deposito", "f_pais", "f_cluster", "f_adr", "f_lead", "f_noches"]
 
 
 def restablecer() -> None:
-    for clave in FILTROS:
-        st.session_state.pop(clave, None)
+    """Cambia la versión de las claves: el navegador recibe controles nuevos con su valor inicial.
+    Borrar las claves de session_state no basta, porque el navegador conserva lo seleccionado."""
+    st.session_state["version_filtros"] = st.session_state.get("version_filtros", 0) + 1
 
 
 def por_frecuencia(col: str) -> list:
@@ -187,19 +187,20 @@ def por_frecuencia(col: str) -> list:
 
 
 with st.sidebar:
+    vf = st.session_state.get("version_filtros", 0)
     st.markdown("### 🏨 Filtros dinámicos")
     st.caption("Actualizan las pestañas Resumen y Segmentación. Una lista vacía equivale a «todos».")
     f_fechas = st.date_input("Rango de llegada", value=(FECHA_MIN, FECHA_MAX), min_value=FECHA_MIN,
-                             max_value=FECHA_MAX, format="DD/MM/YYYY", key="f_fechas")
-    f_hotel = st.multiselect("Hotel", por_frecuencia("hotel"), placeholder="Todos", key="f_hotel")
-    f_segmento = st.multiselect("Segmento de mercado", por_frecuencia("market_segment"), placeholder="Todos", key="f_segmento")
-    f_deposito = st.multiselect("Tipo de depósito", por_frecuencia("deposit_type"), placeholder="Todos", key="f_deposito")
-    f_pais = st.multiselect("País de origen", por_frecuencia("country"), placeholder="Todos", key="f_pais")
-    f_cluster = st.multiselect("Clúster", list(NOMBRES_CLUSTER), placeholder="Todos", key="f_cluster",
+                             max_value=FECHA_MAX, format="DD/MM/YYYY", key=f"f_fechas_{vf}")
+    f_hotel = st.multiselect("Hotel", por_frecuencia("hotel"), placeholder="Todos", key=f"f_hotel_{vf}")
+    f_segmento = st.multiselect("Segmento de mercado", por_frecuencia("market_segment"), placeholder="Todos", key=f"f_segmento_{vf}")
+    f_deposito = st.multiselect("Tipo de depósito", por_frecuencia("deposit_type"), placeholder="Todos", key=f"f_deposito_{vf}")
+    f_pais = st.multiselect("País de origen", por_frecuencia("country"), placeholder="Todos", key=f"f_pais_{vf}")
+    f_cluster = st.multiselect("Clúster", list(NOMBRES_CLUSTER), placeholder="Todos", key=f"f_cluster_{vf}",
                                format_func=lambda k: f"{k} · {NOMBRES_CLUSTER[k]}")
-    f_adr = st.slider("ADR (€)", 0.0, ADR_MAX, (0.0, ADR_MAX), step=5.0, key="f_adr")
-    f_lead = st.slider("Anticipación (días)", 0, LEAD_MAX, (0, LEAD_MAX), key="f_lead")
-    f_noches = st.slider("Noches", 0, NOCHES_MAX, (0, NOCHES_MAX), key="f_noches")
+    f_adr = st.slider("ADR (€)", 0.0, ADR_MAX, (0.0, ADR_MAX), step=5.0, key=f"f_adr_{vf}")
+    f_lead = st.slider("Anticipación (días)", 0, LEAD_MAX, (0, LEAD_MAX), key=f"f_lead_{vf}")
+    f_noches = st.slider("Noches", 0, NOCHES_MAX, (0, NOCHES_MAX), key=f"f_noches_{vf}")
     st.button("Restablecer filtros", on_click=restablecer, width="stretch")
     st.divider()
     st.caption("Modelos de la Fase 3: XGBoost (cancelación y ADR) y K-Means (K = 6).")
