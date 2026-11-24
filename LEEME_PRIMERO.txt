@@ -1,0 +1,17 @@
+HOTEL BOOKING ANALYTICS - FASE 4
+================================
+
+VERSIÓN CORREGIDA PARA PYTHON 3.13
+
+1. Descomprima TODA la carpeta.
+2. Haga doble clic en EJECUTAR_DASHBOARD.bat.
+3. La primera ejecución crea .venv e instala las dependencias.
+4. La prueba de integridad carga los modelos XGBoost nativos (.ubj), reconstruye
+   los preprocesadores con train y valida clasificación, regresión y clustering.
+5. Streamlit abrirá http://localhost:8501
+
+IMPORTANTE:
+- Ya NO se cargan los pipelines XGBoost .joblib originales, porque esos archivos
+  son snapshots pickle y pueden fallar al pasar de Python 3.12 a Python 3.13.
+- Los .joblib originales siguen guardados en models/legacy_joblib como evidencia.
+- No es necesario instalar Python 3.12.
