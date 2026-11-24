@@ -129,13 +129,18 @@ def get_data() -> pd.DataFrame:
     return pd.concat([df, assign_clusters(df, get_models())], axis=1)
 
 
+def version_modelos() -> float:
+    """Fecha del archivo más reciente de models/: invalida la caché cuando se publican cifras nuevas."""
+    return max(f.stat().st_mtime for f in (ROOT / "models").iterdir())
+
+
 @st.cache_data(show_spinner=False)
-def get_json() -> tuple[dict, list, dict]:
+def get_json(version: float) -> tuple[dict, list, dict]:
     return load_metadata(), load_json("confiabilidad_validacion.json"), load_json("metricas_clustering.json")
 
 
 @st.cache_data(show_spinner=False)
-def get_metrics() -> tuple[pd.DataFrame, pd.DataFrame]:
+def get_metrics(version: float) -> tuple[pd.DataFrame, pd.DataFrame]:
     return (pd.read_csv(ROOT / "models" / "metricas_test_clasificacion.csv"),
             pd.read_csv(ROOT / "models" / "metricas_test_regresion.csv"))
 
@@ -151,8 +156,8 @@ def opciones_formulario() -> dict[str, list[str]]:
 
 
 data = get_data()
-metadata, confiabilidad, met_cluster = get_json()
-metrics_class, metrics_reg = get_metrics()
+metadata, confiabilidad, met_cluster = get_json(version_modelos())
+metrics_class, metrics_reg = get_metrics(version_modelos())
 MC, MR = metadata["clasificacion"]["metricas_test"], metadata["regresion"]["metricas_test"]
 UMBRAL = float(metadata["clasificacion"]["umbral"])
 PERFILES = {int(k): v for k, v in metadata["clustering"]["perfiles_train"].items()}
