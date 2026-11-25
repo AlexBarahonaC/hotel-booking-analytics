@@ -619,7 +619,7 @@ with tab_project:
     fases = [("Fase 1 · EDA", "Problema, objetivos SMART, ficha técnica, calidad de datos y análisis exploratorio."),
              ("Fase 2 · Preparación", "Limpieza, variables derivadas, partición agrupada 70/15/15 y baselines sin fuga."),
              ("Fase 3 · Modelado", "Regresión, clasificación, MLP, clustering, optimización e interpretabilidad."),
-             ("Fase 4 · Producto", "Dashboard interactivo, informe final, repositorio y sustentación.")]
+             ("Fase 4 · Producto", "Dashboard interactivo, informe final, repositorio y presentación.")]
     for col, (titulo, texto) in zip(st.columns(4), fases):
         with col, st.container(border=True):
             st.markdown(f"**{titulo}**")

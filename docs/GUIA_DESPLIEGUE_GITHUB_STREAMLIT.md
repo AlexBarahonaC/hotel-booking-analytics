@@ -28,4 +28,4 @@ El archivo más grande pesa unos 21 MB, por debajo del límite de 100 MB de GitH
 - Abre la URL en una ventana de incógnito: debe cargar sin iniciar sesión.
 - Ejecuta una predicción y cambia un filtro.
 - Pega las dos URL en `README.md` y en el informe.
-- El día de la sustentación, abre la app unos minutos antes: si estuvo inactiva puede tardar en despertar. Ten lista la versión local como respaldo.
+- El día de la presentación, abre la app unos minutos antes: si estuvo inactiva puede tardar en despertar. Ten lista la versión local como respaldo.

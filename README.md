@@ -58,7 +58,7 @@ Proceden del cuaderno `notebooks/Fase3_ModeladoAvanzado_Colab.ipynb` (ejecución
 ├── dashboard/       Aplicación Streamlit
 ├── models/          Modelos portables, métricas y metadatos
 ├── figures/         Figuras de la Fase 3
-├── docs/            Informes, capturas, guía de publicación y guion de sustentación
+├── docs/            Informes, capturas y guía de publicación
 ├── requirements.txt             Dependencias del dashboard
 └── requirements-notebooks.txt   Dependencias de los cuadernos
 ```
